@@ -40,8 +40,12 @@ User Query: {content}
 
 agent = create_agent(model, tools, system_prompt=prompt)
 
-if __name__ == "__main__":
-    query = "calculate the number of boys present on saturday."
-    res = agent.invoke({"messages": [{"role": "user", "content": query}]})
-    final_output = res["messages"][-1].content
-    print(final_output)
+# if __name__ == "__main__":
+# query = "calculate the number of boys present on saturday."
+# res = agent.invoke({"messages": [{"role": "user", "content": query}]})
+# final_output = res["messages"][-1].content
+# print(final_output)
+
+def answer_query(query: str):
+    for chunk in agent.stream({"messages": [{"role": "user", "content": query}]}, stream_mode='custom'):
+        print(chunk)

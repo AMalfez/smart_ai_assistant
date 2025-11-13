@@ -1,20 +1,29 @@
 from langchain.tools import tool
 from chroma import vector_store
 from llm import model
+from langgraph.config import get_stream_writer
+import re
 
 @tool
 def get_summary(query: str):
     """Given the context, Get a concise summary for a given query."""
+    writer = get_stream_writer()
+    writer('🔍 Searching relevant sections in ChromaDB...')
     retrieved_docs = vector_store.similarity_search(query, k=4)
     combined_text = "\n\n".join([doc.page_content for doc in retrieved_docs])
+    writer(f'📚 Retrieved {len(combined_text)} chunks')
     prompt = f"""
     Summarize the following text based on the query: "{query}".
     Focus only on relevant details, concise and clear.
     ---
     {combined_text}
     """
+
+    writer('🧩 Using LangChain agent to summarize...')
     response = model.invoke(prompt)
-    return response.content
+    text = response.content
+    writer(f"💬 Answer: {text}\n")
+
 
 @tool
 def do_math(query: str):
@@ -22,6 +31,8 @@ def do_math(query: str):
     Retrieves relevant docs from vectordb, extracts numeric facts, and computes the answer.
     Returns step-by-step computation and the final numeric value.
     """
+    writer = get_stream_writer()
+    writer('🔧 Invoking MathTool...')
     retrieved_docs = vector_store.similarity_search(query)
     combined_text = "\n\n".join([doc.page_content for doc in retrieved_docs])
 
@@ -65,4 +76,14 @@ def do_math(query: str):
     Now, perform the task.
     """
     resp = model.invoke(prompt)
-    return resp.content
+    text = resp.content
+
+    match = re.search(r"Final Answer:\s*(.+)", text)
+    if match:
+        final = match.group(1).strip()
+        writer(f"💬 Answer:: {final}\n")
+        return final
+
+    # Fallback if no match
+    writer("\n⚠️ Could not parse final answer from response.\n")
+    return text
