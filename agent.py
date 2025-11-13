@@ -1,9 +1,9 @@
-import os
 from langchain.agents import create_agent
 from tools.summarizer import get_summary
 from tools.mathtool import do_math
 from dotenv import load_dotenv
 from llm import model
+
 load_dotenv()
 
 tools = [get_summary, do_math]

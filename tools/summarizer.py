@@ -9,8 +9,11 @@ def get_summary(query: str):
     writer = get_stream_writer()
     writer('🔍 Searching relevant sections in ChromaDB...\n')
     retrieved_docs = vector_store.similarity_search(query, k=4)
+    if not retrieved_docs:
+        writer("⚠️ No relevant documents found.\n")
+        
     combined_text = "\n\n".join([doc.page_content for doc in retrieved_docs])
-    writer(f'📚 Retrieved {len(combined_text)} chunks\n')
+    writer(f'📚 Retrieved {len(retrieved_docs)} chunks\n')
     prompt = f"""
     Summarize the following text based on the query: "{query}".
     Focus only on relevant details, concise and clear.

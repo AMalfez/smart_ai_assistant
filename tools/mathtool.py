@@ -1,9 +1,7 @@
 from langchain.tools import tool
 from chroma import vector_store
-from llm import model
+from llm import model_with_structure
 from langgraph.config import get_stream_writer
-import re
-
 
 @tool
 def do_math(query: str):
@@ -11,7 +9,8 @@ def do_math(query: str):
     Retrieves relevant docs from vectordb, extracts numeric facts, and computes the answer.
     Returns step-by-step computation and the final numeric value.
     """
-    writer = get_stream_writer()
+    
+    writer = get_stream_writer() #for streaming output
     writer('🔧 Invoking MathTool...\n')
     retrieved_docs = vector_store.similarity_search(query)
     combined_text = "\n\n".join([doc.page_content for doc in retrieved_docs])
@@ -31,37 +30,17 @@ def do_math(query: str):
     - Example: {{ "text": "Out of 100 students, 80 were present", "value": 80, "unit": "students", "context": "present" }}
 
     2) Using only those facts, perform the arithmetic or reasoning needed to answer the user question.
-    - Show every step of the arithmetic (e.g., "80 * 0.40 = 32").
     - If percentages are involved, convert them properly (e.g., 40% -> 0.40).
 
     3) Provide a clear final answer labeled "Final Answer:" followed by a single numeric result and unit if applicable.
-    - Also include the minimal expression used (e.g., "80 * 0.40 = 32").
 
     Important constraints:
     - Only use facts that are actually present in the documents above.
     - If necessary facts are missing, state clearly which fact is missing and why you cannot compute the final number.
     - Do not hallucinate extra facts.
 
-    Output format (important — produce valid JSON + steps + final answer):
-    ----
-    FACTS_JSON:
-    <json array here>
-
-    STEPS:
-    1) ...
-    2) ...
-
-    Final Answer: <number> <unit or empty>
-    ----
     Now, perform the task.
     """
-    resp = model.invoke(prompt)
-    text = resp.content
+    resp = model_with_structure.invoke(prompt)
 
-    match = re.search(r"Final Answer:\s*(.+)", text)
-    if match:
-        final = match.group(1).strip()
-        writer(f"💬 Answer:: {final}\n")
-
-    # Fallback if no match
-    writer("\n⚠️ Could not parse final answer from response.\n")
+    writer(f"💬 Answer: {resp['final_answer']}\n")
