@@ -6,8 +6,8 @@ from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from chroma import AddDocument
 
 # --- Global Setup ---
-st.set_page_config(page_title="RAG Stream App", page_icon="🤖", layout="wide")
-st.title("📘 RAG Stream Demo with Gemini + HuggingFace + Tools")
+st.set_page_config(page_title="Smart Research Assistant", page_icon="🧠", layout="wide")
+st.title("Smart Research Assistant 🧠")
 
 # --- File Upload ---
 uploaded_files = st.file_uploader("Upload PDF or TXT files", type=["pdf", "txt"], accept_multiple_files=True)
