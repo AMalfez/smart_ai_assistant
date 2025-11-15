@@ -48,7 +48,7 @@ if uploaded_files:
 
             # --- Stream ---
             full_output = ""
-            for chunk in agent.stream({"messages": [{"role": "user", "content": query}]}, stream_mode="custom"):
+            for chunk in agent.stream({"messages": [{"role": "user", "content": query}]}, {"configurable": {"thread_id": "2"}}, stream_mode="custom"):
                 full_output += chunk
                 st_div.markdown(f"```\n{full_output}\n```")
 

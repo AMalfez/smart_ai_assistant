@@ -3,6 +3,8 @@ from tools.summarizer import get_summary
 from tools.mathtool import do_math
 from dotenv import load_dotenv
 from llm import model
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain.agents.middleware import SummarizationMiddleware
 
 load_dotenv()
 
@@ -20,4 +22,4 @@ User Query: {content}
 """
 )
 
-agent = create_agent(model, tools, system_prompt=prompt)
+agent = create_agent(model, tools, middleware=[SummarizationMiddleware(model='google_genai:gemini-2.5-flash-lite', max_tokens_before_summary=100, messages_to_keep=2)], system_prompt=prompt, checkpointer=InMemorySaver())

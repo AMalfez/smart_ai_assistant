@@ -1,13 +1,14 @@
-from langchain.tools import tool
+from langchain.tools import tool, ToolRuntime
 from chroma import vector_store
 from llm import model
 from langgraph.config import get_stream_writer
 
 @tool
-def get_summary(query: str):
+def get_summary(query: str, runtime: ToolRuntime):
     """Given the context, Get a concise summary for a given query."""
     writer = get_stream_writer()
     writer('🔍 Searching relevant sections in ChromaDB...\n')
+    writer(f'{runtime.state['messages']}\n')
     retrieved_docs = vector_store.similarity_search(query, k=4)
     if not retrieved_docs:
         writer("⚠️ No relevant documents found.\n")
@@ -18,7 +19,8 @@ def get_summary(query: str):
     Summarize the following text based on the query: "{query}".
     Focus only on relevant details, concise and clear.
     ---
-    {combined_text}
+    context:{combined_text}
+    previous_conversations:{runtime.state['messages']}
     """
 
     writer('🧩 Using LangChain agent to summarize...\n')

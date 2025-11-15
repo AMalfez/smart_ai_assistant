@@ -1,10 +1,10 @@
-from langchain.tools import tool
+from langchain.tools import tool, ToolRuntime
 from chroma import vector_store
 from llm import model_with_structure
 from langgraph.config import get_stream_writer
 
 @tool
-def do_math(query: str):
+def do_math(query: str, runtime: ToolRuntime):
     """
     Retrieves relevant docs from vectordb, extracts numeric facts, and computes the answer.
     Returns step-by-step computation and the final numeric value.
@@ -23,6 +23,9 @@ def do_math(query: str):
 
     Documents (only use numeric facts from these to compute):
     {combined_text}
+
+    Previous conversations:
+    {runtime.state['messages']}
 
     Tasks (strictly do these, in order):
     1) Extract numeric facts from the documents and present them as a JSON array named "facts".
